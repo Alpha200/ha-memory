@@ -34,7 +34,7 @@ COPY main.py .
 VOLUME ["/app/data"]
 
 # Expose the port the app runs on
-EXPOSE 8080
+EXPOSE 8300
 
 # Create non-root user for security
 RUN adduser --disabled-password --gecos '' appuser && \
@@ -43,7 +43,7 @@ USER appuser
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost:8300/health || exit 1
 
 # Run the application
 CMD ["python", "main.py"]
