@@ -97,8 +97,8 @@ async def create_or_update_memory(
         memory_content: Annotated[str, "The content of the memory entry"],
         place: Annotated[str | None, "A short name of the place this memory is associated with like 'home' or 'work' (optional)"] = None,
         labels: Annotated[List[str] | None, "List of labels/tags for this memory (optional)"] = None,
-        relevant_start: Annotated[str | None, "A relative date string like '3 days ago' when this memory becomes relevant (optional, in english)"] = None,
-        relevant_end: Annotated[str | None, "A relative date string like 'in 2 weeks' when this memory stops being relevant (optional, in english)"] = None
+        relevant_start: Annotated[str | None, "ISO date (e.g. 2025-09-02T20:58:43.065489+02:00) when this memory becomes relevant (optional)"] = None,
+        relevant_end: Annotated[str | None, "ISO date (e.g. 2025-09-03T20:58:43.065489+02:00) when this memory stops being relevant (optional)"] = None
 ):
     """Create or update a memory entry by title"""
 
@@ -107,13 +107,11 @@ async def create_or_update_memory(
 
     relevant_start_date = None
     if relevant_start is not None and relevant_start != "":
-        arw = arrow.utcnow()
-        relevant_start_date = arw.dehumanize(relevant_start)
+        relevant_start_date = arrow.get(relevant_start)
 
     relevant_end_date = None
     if relevant_end is not None and relevant_end != "":
-        arw = arrow.utcnow()
-        relevant_end_date = arw.dehumanize(relevant_end)
+        relevant_end_date = arrow.get(relevant_end)
 
     entry = MemoryEntry(
         title=memory_title,
