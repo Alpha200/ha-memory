@@ -7,7 +7,7 @@ A FastMCP-based memory management service that allows you to store, retrieve, an
 - 📝 **Create and Update Memories**: Store memories with titles, content, and optional metadata
 - 📍 **Location Tracking**: Associate memories with specific places
 - 🏷️ **Label System**: Tag memories with multiple labels for better organization
-- ⏰ **Relevance Periods**: Set when memories become relevant and when they expire using natural language
+- ⏰ **Relevance Periods**: Set when memories become relevant and when they expire using ISO date strings (e.g., 2025-09-02T20:58:43.065489+02:00)
 - 🔍 **Advanced Search**: Find memories by title, location, labels, or relevance period
 - 📅 **Modification Tracking**: Automatic tracking of when memories were last updated
 - 💾 **Persistent Storage**: All memories are saved to JSON file with automatic persistence
@@ -18,7 +18,7 @@ A FastMCP-based memory management service that allows you to store, retrieve, an
 The service provides the following MCP tools:
 
 ### Memory Management
-- `create_or_update_memory` - Create or update a memory entry with labels and relevance periods
+- `create_or_update_memory` - Create or update a memory entry with labels and relevance periods (relevant_start and relevant_end must be ISO date strings)
 - `list_memories` - List all memory entries with complete information (title, content, place, labels, dates)
 - `get_memory` - Retrieve a specific memory by title
 - `delete_memory` - Delete a memory entry
@@ -74,54 +74,6 @@ The service will be available at `http://localhost:8300`
 | `DATA_DIR` | `./data` | Directory where memories.json will be stored |
 | `HOST` | `0.0.0.0` | Host address to bind the server |
 | `PORT` | `8300` | Port to run the server on |
-
-## Example Usage
-
-### Creating a Memory with Labels and Relevance
-```python
-await create_or_update_memory(
-    memory_title="Project Deadline",
-    memory_content="Submit final report for the Q3 analysis project",
-    place="office",
-    labels=["work", "deadline", "urgent"],
-    relevant_start="in 1 week",
-    relevant_end="in 2 weeks"
-)
-```
-
-### Searching and Filtering
-```python
-# Get a specific memory
-memory = await get_memory("Project Deadline")
-
-# List all memories
-titles = await list_memories()
-
-# Get memories by location
-office_memories = await get_memories_by_place("office")
-
-# Get memories by label
-work_memories = await get_memories_by_label("work")
-
-# Get currently relevant memories
-current_memories = await get_relevant_memories()
-
-# List all available labels
-all_labels = await list_labels()
-```
-
-### Memory Response Format
-```python
-{
-    "title": "Project Deadline",
-    "content": "Submit final report for the Q3 analysis project",
-    "place": "office",
-    "labels": ["work", "deadline", "urgent"],
-    "relevant_start": "in 6 days",  # Humanized relative date
-    "relevant_end": "in 2 weeks",   # Humanized relative date
-    "modified_at": "a few seconds ago"  # When last updated
-}
-```
 
 ## Development
 
