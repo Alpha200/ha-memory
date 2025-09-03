@@ -130,7 +130,6 @@ async def create_or_update_memory(
 async def list_memories() -> List[MemoryResponse]:
     """List all memory entries with their basic information"""
     memories = []
-
     for entry in memory_entries.values():
         memories.append(MemoryResponse(
             title=entry.title,
@@ -141,7 +140,6 @@ async def list_memories() -> List[MemoryResponse]:
             relevant_end=entry.relevant_end.humanize() if entry.relevant_end else None,
             modified_at=entry.modified_at.humanize()
         ))
-
     return memories
 
 @mcp.tool
@@ -153,109 +151,6 @@ async def delete_memory(memory_title: Annotated[str, "The title of the memory en
         return f"Memory '{memory_title}' deleted successfully"
     else:
         return f"Memory '{memory_title}' not found"
-
-@mcp.tool
-async def get_memory(memory_title: Annotated[str, "The title of the memory entry to retrieve"]) -> Union[MemoryResponse, MemoryError]:
-    """Get a memory entry by title"""
-    if memory_title not in memory_entries:
-        return MemoryError(error=f"Memory '{memory_title}' not found")
-
-    entry = memory_entries[memory_title]
-
-    return MemoryResponse(
-        title=entry.title,
-        content=entry.content,
-        place=entry.place,
-        labels=entry.labels,
-        relevant_start=entry.relevant_start.humanize() if entry.relevant_start else None,
-        relevant_end=entry.relevant_end.humanize() if entry.relevant_end else None,
-        modified_at=entry.modified_at.humanize()
-    )
-
-@mcp.tool
-async def list_places() -> List[str]:
-    """List all unique places from memory entries"""
-    places = set()
-    for entry in memory_entries.values():
-        if entry.place is not None and entry.place.strip() != "":
-            places.add(entry.place)
-    return sorted(list(places))
-
-@mcp.tool
-async def get_memories_by_place(place: Annotated[str, "The place to search for memories"]) -> List[MemoryResponse]:
-    """Get all memory entries associated with a specific place"""
-    memories = []
-
-    for entry in memory_entries.values():
-        if entry.place == place:
-            memories.append(MemoryResponse(
-                title=entry.title,
-                content=entry.content,
-                place=entry.place,
-                labels=entry.labels,
-                relevant_start=entry.relevant_start.humanize() if entry.relevant_start else None,
-                relevant_end=entry.relevant_end.humanize() if entry.relevant_end else None,
-                modified_at=entry.modified_at.humanize()
-            ))
-
-    return memories
-
-@mcp.tool
-async def get_memories_by_label(label: Annotated[str, "The label to search for memories"]) -> List[MemoryResponse]:
-    """Get all memory entries that contain a specific label"""
-    memories = []
-
-    for entry in memory_entries.values():
-        if label in entry.labels:
-            memories.append(MemoryResponse(
-                title=entry.title,
-                content=entry.content,
-                place=entry.place,
-                labels=entry.labels,
-                relevant_start=entry.relevant_start.humanize() if entry.relevant_start else None,
-                relevant_end=entry.relevant_end.humanize() if entry.relevant_end else None,
-                modified_at=entry.modified_at.humanize()
-            ))
-
-    return memories
-
-@mcp.tool
-async def list_labels() -> List[str]:
-    """List all unique labels from memory entries"""
-    labels = set()
-    for entry in memory_entries.values():
-        labels.update(entry.labels)
-    return sorted(list(labels))
-
-@mcp.tool
-async def get_relevant_memories() -> List[MemoryResponse]:
-    """Get all memories that are currently relevant (based on date)"""
-    now = arrow.utcnow()
-    memories = []
-
-    for entry in memory_entries.values():
-        is_relevant = True
-
-        # Check if it's past the start date (if specified)
-        if entry.relevant_start and now < entry.relevant_start:
-            is_relevant = False
-
-        # Check if it's before the end date (if specified)
-        if entry.relevant_end and now > entry.relevant_end:
-            is_relevant = False
-
-        if is_relevant:
-            memories.append(MemoryResponse(
-                title=entry.title,
-                content=entry.content,
-                place=entry.place,
-                labels=entry.labels,
-                relevant_start=entry.relevant_start.humanize() if entry.relevant_start else None,
-                relevant_end=entry.relevant_end.humanize() if entry.relevant_end else None,
-                modified_at=entry.modified_at.humanize()
-            ))
-
-    return memories
 
 if __name__ == "__main__":
     load_memories()

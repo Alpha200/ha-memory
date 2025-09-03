@@ -8,7 +8,6 @@ A FastMCP-based memory management service that allows you to store, retrieve, an
 - 📍 **Location Tracking**: Associate memories with specific places
 - 🏷️ **Label System**: Tag memories with multiple labels for better organization
 - ⏰ **Relevance Periods**: Set when memories become relevant and when they expire using ISO date strings (e.g., 2025-09-02T20:58:43.065489+02:00)
-- 🔍 **Advanced Search**: Find memories by title, location, labels, or relevance period
 - 📅 **Modification Tracking**: Automatic tracking of when memories were last updated
 - 💾 **Persistent Storage**: All memories are saved to JSON file with automatic persistence
 - 🐳 **Docker Ready**: Containerized application with volume mounting for data persistence
@@ -20,17 +19,7 @@ The service provides the following MCP tools:
 ### Memory Management
 - `create_or_update_memory` - Create or update a memory entry with labels and relevance periods (relevant_start and relevant_end must be ISO date strings)
 - `list_memories` - List all memory entries with complete information (title, content, place, labels, dates)
-- `get_memory` - Retrieve a specific memory by title
 - `delete_memory` - Delete a memory entry
-
-### Search and Filter
-- `get_memories_by_place` - Get all memories for a specific place
-- `get_memories_by_label` - Get all memories that contain a specific label
-- `get_relevant_memories` - Get memories that are currently relevant (within their date range)
-
-### Organization
-- `list_places` - List all unique places from memories
-- `list_labels` - List all unique labels from memories
 
 ## Quick Start
 
