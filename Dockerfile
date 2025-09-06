@@ -28,7 +28,7 @@ COPY pyproject.toml poetry.lock* ./
 RUN poetry install --only main --no-root
 
 # Copy application code
-COPY main.py .
+COPY main.py memory_manager.py ./
 
 # Create volume mount point for persistent data
 VOLUME ["/app/data"]
