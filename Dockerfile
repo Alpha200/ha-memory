@@ -29,21 +29,22 @@ RUN poetry install --only main --no-root
 
 # Copy application code
 COPY main.py memory_manager.py ./
+COPY templates/ ./templates/
 
 # Create volume mount point for persistent data
 VOLUME ["/app/data"]
 
-# Expose the port the app runs on
-EXPOSE 8300
+# Expose both ports the app runs on
+EXPOSE 8300 8301
 
 # Create non-root user for security
 RUN adduser --disabled-password --gecos '' appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
-# Health check
+# Health check using the web interface health endpoint
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8300/health || exit 1
+    CMD curl -f http://localhost:8301/health || exit 1
 
 # Run the application
 CMD ["python", "main.py"]
