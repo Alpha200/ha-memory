@@ -27,7 +27,7 @@ class MemoryResponse(TypedDict):
     id: str
     content: str
     place: str | None
-    type: Literal["user", "system"]
+    type: Literal["user", "system", "instructions"]
     created_at: str
     modified_at: str
 
@@ -40,7 +40,7 @@ async def create_or_update_memory(
         memory_content: Annotated[str, "The content of the memory entry"],
         memory_id: Annotated[str | None, "The ID of the memory entry to update (optional, will create new if not provided)"] = None,
         place: Annotated[str | None, "A short name of the place this memory is associated with like 'home' or 'work' (optional)"] = None,
-        memory_type: Annotated[Literal["user", "system"], "The type of memory: 'user' for user memories or 'system' for system-generated memories"] = "user"
+        memory_type: Annotated[Literal["user", "system", "instructions"], "The type of memory: 'user' for user memories, 'system' for system-generated memories, or 'instructions' for instruction memories"] = "user"
 ):
     """Create a new memory entry or update an existing one by ID"""
     return memory_manager.create_or_update_memory(memory_content, memory_id, place, memory_type)
@@ -71,7 +71,7 @@ async def delete_memory(memory_id: Annotated[str, "The ID of the memory entry to
 # Web UI Routes
 @web_app.get("/", response_class=HTMLResponse)
 async def read_memories_ui(request: Request, type: str | None = None):  # 'type' query param for filtering
-    """Web interface to view all memories (optional filter by ?type=user|system)"""
+    """Web interface to view all memories (optional filter by ?type=user|system|instructions)"""
     # Load fresh data each time
     memory_manager.load_memories()
 
@@ -90,19 +90,18 @@ async def read_memories_ui(request: Request, type: str | None = None):  # 'type'
 
     selected_type = 'all'
     filtered_memories = all_memories
-    if type and type.lower() in {"user", "system"}:  # validate
+    if type and type.lower() in {"user", "system", "instructions"}:  # validate
         selected_type = type.lower()
         filtered_memories = [m for m in all_memories if m['type'] == selected_type]
 
-    # Sort memories: user memories first (newest first), then system memories (newest first)
-    filtered_memories.sort(key=lambda x: (x['type'] == 'system', x['modified_at']), reverse=False)
-    # This sorts by: 1) type (False for user, True for system), 2) modified_at ascending
-    # Then reverse the modified_at part only by using a custom sort
+    # Sort memories: instructions first (newest first), then user memories (newest first), then system memories (newest first)
+    instructions_memories = [m for m in filtered_memories if m['type'] == 'instructions']
     user_memories = [m for m in filtered_memories if m['type'] == 'user']
     system_memories = [m for m in filtered_memories if m['type'] == 'system']
+    instructions_memories.sort(key=lambda x: x['modified_at'], reverse=True)
     user_memories.sort(key=lambda x: x['modified_at'], reverse=True)
     system_memories.sort(key=lambda x: x['modified_at'], reverse=True)
-    filtered_memories = user_memories + system_memories
+    filtered_memories = instructions_memories + user_memories + system_memories
 
     return templates.TemplateResponse("memories.html", {
         "request": request,
@@ -114,7 +113,7 @@ async def read_memories_ui(request: Request, type: str | None = None):  # 'type'
 
 @web_app.get("/api/memories")
 async def get_memories_json(type: str | None = None):
-    """API endpoint to get memories as JSON (optional filter by ?type=user|system)"""
+    """API endpoint to get memories as JSON (optional filter by ?type=user|system|instructions)"""
     # Load fresh data each time
     memory_manager.load_memories()
 
@@ -131,17 +130,19 @@ async def get_memories_json(type: str | None = None):
 
     overall_count = len(memories)
 
-    if type and type.lower() in {"user", "system"}:
+    if type and type.lower() in {"user", "system", "instructions"}:
         memories = [m for m in memories if m['type'] == type.lower()]
 
-    # Sort memories: user memories first (newest first), then system memories (newest first)
+    # Sort memories: instructions first (newest first), then user memories (newest first), then system memories (newest first)
+    instructions_memories = [m for m in memories if m['type'] == 'instructions']
     user_memories = [m for m in memories if m['type'] == 'user']
     system_memories = [m for m in memories if m['type'] == 'system']
+    instructions_memories.sort(key=lambda x: x['modified_at'], reverse=True)
     user_memories.sort(key=lambda x: x['modified_at'], reverse=True)
     system_memories.sort(key=lambda x: x['modified_at'], reverse=True)
-    memories = user_memories + system_memories
+    memories = instructions_memories + user_memories + system_memories
 
-    return {"memories": memories, "total_count": len(memories), "overall_count": overall_count, "selected_type": type.lower() if type and type.lower() in {"user", "system"} else 'all'}
+    return {"memories": memories, "total_count": len(memories), "overall_count": overall_count, "selected_type": type.lower() if type and type.lower() in {"user", "system", "instructions"} else 'all'}
 
 @web_app.get("/health")
 async def health_check():

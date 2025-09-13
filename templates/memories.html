@@ -186,6 +186,10 @@
             border-color: rgba(240,147,251,0.35);
             background: rgba(240,147,251,0.08);
         }
+        .memory-type.type-instructions {
+            border-color: rgba(34,197,94,0.35);
+            background: rgba(34,197,94,0.08);
+        }
         .place-tag {
             border-color: rgba(79,172,254,0.35);
             background: rgba(79,172,254,0.08);
@@ -346,6 +350,7 @@
 
         <div class="filter-bar">
             <a class="filter-btn {% if selected_type=='all' %}active{% endif %}" href="/">All</a>
+            <a class="filter-btn {% if selected_type=='instructions' %}active{% endif %}" href="/?type=instructions">Instructions</a>
             <a class="filter-btn {% if selected_type=='user' %}active{% endif %}" href="/?type=user">User</a>
             <a class="filter-btn {% if selected_type=='system' %}active{% endif %}" href="/?type=system">System</a>
         </div>

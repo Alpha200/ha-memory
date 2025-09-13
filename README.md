@@ -1,119 +1,189 @@
-# 🧠 HA Memory
+# HA Memory
 
-A FastMCP-based memory management system with a modern web interface for storing, viewing, and managing memories with UUID-based identification.
+A sophisticated memory management system for Home Assistant that provides both MCP (Model Context Protocol) server capabilities and a beautiful web interface for storing, retrieving, and managing digital memories.
 
 ## Features
 
-- **Modern Web Interface**: Beautiful, responsive web UI for viewing and managing memories
-- **UUID-based identification**: Each memory entry has a unique UUID4 identifier
-- **Type classification**: Memories can be classified as "user" or "system" type
-- **Smart sorting**: User memories appear first, system memories at the bottom
-- **Location tracking**: Optional place field to associate memories with locations
-- **Timestamp tracking**: Both creation and modification timestamps
-- **Persistent storage**: Memories are stored in JSON format on disk
-- **Real-time updates**: Web interface auto-refreshes every 30 seconds
-- **Filtering**: Filter memories by type (All, User, System)
-- **Delete functionality**: Remove memories directly from the web interface
+- **Multiple Memory Types**: Support for three distinct memory types:
+  - **Instructions**: High-priority memories for system instructions and commands
+  - **User**: Personal memories and notes from users
+  - **System**: System-generated memories and automated notes
 
-## Memory Structure
+- **MCP Server**: Full Model Context Protocol implementation for AI assistant integration
+- **Web Interface**: Modern, responsive web UI for viewing and managing memories
+- **Real-time Management**: Create, update, delete, and filter memories in real-time
+- **Smart Sorting**: Automatic prioritization with instructions first, followed by user and system memories
+- **Place Tagging**: Associate memories with specific locations or contexts
 
-Each memory entry contains:
-- `id`: Unique UUID4 identifier
-- `content`: The actual memory content
-- `place`: Optional location name (e.g., "home", "work")
-- `type`: Either "user" (user-created) or "system" (system-generated)
-- `created_at`: Timestamp when the memory was first created
-- `modified_at`: Timestamp when the memory was last modified
+## Quick Start
+
+### Using Docker (Recommended)
+
+```bash
+# Build and run with Docker
+docker build -t ha-memory .
+docker run -p 8300:8300 -p 8301:8301 -v ./data:/app/data ha-memory
+```
+
+### Manual Installation
+
+```bash
+# Install dependencies
+poetry install
+
+# Run the application
+poetry run python main.py
+```
+
+## Services
+
+The application runs two services simultaneously:
+
+- **MCP Server**: `http://localhost:8300` - Model Context Protocol interface
+- **Web Interface**: `http://localhost:8301` - Interactive web UI
+
+## Memory Types
+
+### Instructions 🟢
+- Highest priority memories
+- Displayed first in all views
+- Ideal for system instructions, commands, and critical information
+- Green color coding in the UI
+
+### User 🔵
+- Personal memories and user-generated content
+- Medium priority
+- Blue color coding in the UI
+
+### System 🟣
+- System-generated memories and automated notes
+- Lowest priority (displayed last)
+- Purple color coding in the UI
+
+## API Usage
+
+### REST API
+
+#### Get Memories
+```bash
+# Get all memories
+GET /api/memories
+
+# Filter by type
+GET /api/memories?type=instructions
+GET /api/memories?type=user
+GET /api/memories?type=system
+```
+
+#### Delete Memory
+```bash
+DELETE /api/memories/{memory_id}
+```
 
 ## Web Interface
 
-The web interface is available at `http://localhost:8301` and provides:
+The web interface provides:
 
-- **Memory Listing**: View all memories with clean, card-based layout
-- **Type Filtering**: Filter by All, User, or System memories
-- **Memory Counts**: See filtered count vs total count
-- **Delete Confirmation**: Safe deletion with confirmation dialogs
-- **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **Dark Theme**: Modern dark theme with gradient backgrounds
+- **Filter by Type**: Quick buttons to filter by memory type
+- **Real-time Counts**: Live memory statistics
+- **Responsive Design**: Works on desktop and mobile devices
+- **Delete Functionality**: Remove memories with confirmation
+- **Auto-refresh**: Updates every 30 seconds
+- **Smooth Animations**: Fade-in/out effects for better UX
 
-### Features
-- User memories are prioritized and shown first
-- System memories appear at the bottom
-- Each memory type has distinct color coding (blue for user, purple for system)
-- Place tags are shown when available
-- Creation and modification timestamps are displayed
-- Smooth animations and hover effects
+### Filtering
 
-## MCP Tools
-
-### Create or Update Memory
-```
-create_or_update_memory(memory_content, memory_id=None, place=None, memory_type="user")
-```
-- Creates a new memory if no `memory_id` is provided
-- Updates existing memory if `memory_id` exists
-- Returns the memory ID (UUID)
-
-### List All Memories
-```
-list_memories()
-```
-- Returns all stored memories with human-readable timestamps
-- Includes all memory fields in the response
-
-### Delete Memory
-```
-delete_memory(memory_id)
-```
-- Deletes a memory entry by its UUID
-- Returns confirmation message
-
-## API Endpoints
-
-The web interface uses these REST API endpoints:
-
-- `GET /` - Main web interface
-- `GET /?type=user|system` - Filtered web interface
-- `GET /api/memories` - JSON API for all memories
-- `GET /api/memories?type=user|system` - Filtered JSON API
-- `DELETE /api/memories/{memory_id}` - Delete a specific memory
-- `GET /health` - Health check endpoint
-
-## Configuration
-
-Set the `DATA_DIR` environment variable to specify where memory data should be stored. Defaults to `./data`.
-
-## Running
-
-```bash
-python main.py
-```
-
-This starts both servers:
-- **MCP Server**: `http://0.0.0.0:8300` (for MCP clients)
-- **Web Interface**: `http://0.0.0.0:8301` (for browser access)
+Use the filter buttons to view specific memory types:
+- **All**: Show all memories (default sorting: instructions → user → system)
+- **Instructions**: Show only instruction memories
+- **User**: Show only user memories  
+- **System**: Show only system memories
 
 ## Data Storage
 
-Memories are stored in `{DATA_DIR}/memories.json` with the following structure:
+Memories are stored in JSON format in the `./data/memories.json` file. The data directory is configurable via the `DATA_DIR` environment variable.
 
+### Data Format
 ```json
 {
-  "uuid-here": {
-    "id": "uuid-here",
-    "content": "Memory content",
-    "place": "home", 
-    "type": "user",
-    "created_at": "2025-09-06T12:00:00+00:00",
-    "modified_at": "2025-09-06T12:00:00+00:00"
+  "version": 2,
+  "memories": {
+    "memory-id": {
+      "content": "Memory content",
+      "place": "optional-place",
+      "type": "instructions|user|system",
+      "created_at": "2024-01-01T00:00:00+00:00",
+      "modified_at": "2024-01-01T00:00:00+00:00"
+    }
   }
 }
 ```
 
+## Configuration
+
+### Environment Variables
+
+- `DATA_DIR`: Directory for data storage (default: `./data`)
+
+### Docker Configuration
+
+The included Dockerfile provides:
+- Python 3.13 runtime
+- Poetry for dependency management
+- Volume mounting for persistent data
+- Health checks for both services
+- Optimized multi-stage build
+
 ## Development
 
-Built with:
-- **FastMCP**: For MCP protocol support
-- **FastAPI**: For web API and interface
-- **Jinja2**: For HTML templating
-- **Modern CSS**: Responsive design with dark theme
+### Prerequisites
+- Python 3.11+
+- Poetry for dependency management
+
+### Setup
+```bash
+# Clone the repository
+git clone <repository-url>
+cd ha-memory
+
+# Install dependencies
+poetry install
+
+# Run in development mode
+poetry run python main.py
+```
+
+### Project Structure
+```
+ha-memory/
+├── main.py              # Main application with MCP and web servers
+├── memory_manager.py    # Core memory management logic
+├── templates/
+│   └── memories.html    # Web interface template
+├── data/               # Data storage directory
+│   └── memories.json   # Memory data file
+├── Dockerfile          # Container configuration
+├── pyproject.toml      # Python dependencies
+└── README.md           # This file
+```
+
+## Migration
+
+The system automatically migrates from version 1 to version 2 data format when needed. No manual intervention required.
+
+## Health Checks
+
+- Web Interface: `GET /health`
+- Returns: `{"status": "ok", "service": "HA Memory Web UI"}`
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is open source and available under the MIT License.

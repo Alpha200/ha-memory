@@ -11,7 +11,7 @@ class MemoryEntry:
     id: str
     content: str
     place: str | None
-    type: Literal["user", "system"]
+    type: Literal["user", "system", "instructions"]
     created_at: Arrow
     modified_at: Arrow
 
@@ -121,7 +121,7 @@ class MemoryManager:
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             print(f"Error loading memories: {e}")
 
-    def create_or_update_memory(self, content: str, memory_id: str = None, place: str = None, memory_type: Literal["user", "system"] = "user") -> str:
+    def create_or_update_memory(self, content: str, memory_id: str = None, place: str = None, memory_type: Literal["user", "system", "instructions"] = "user") -> str:
         """Create a new memory entry or update an existing one by ID"""
         # If no ID provided, create a new memory
         if memory_id is None:
